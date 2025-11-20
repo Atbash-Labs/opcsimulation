@@ -69,7 +69,7 @@ async def create_test_server(port: int = 4840):
 
     # Create a more complex structure
     production_folder = await objects.add_folder(idx, "Production")
-    
+
     # Production line 1
     line1 = await production_folder.add_folder(idx, "Line1")
     line1_status = await line1.add_variable(idx, "Status", "Running")
@@ -78,7 +78,7 @@ async def create_test_server(port: int = 4840):
     await line1_speed.set_writable()
     line1_temp = await line1.add_variable(idx, "Temperature", 75)
     await line1_temp.set_writable()
-    
+
     # Production line 2
     line2 = await production_folder.add_folder(idx, "Line2")
     line2_status = await line2.add_variable(idx, "Status", "Stopped")
@@ -87,18 +87,18 @@ async def create_test_server(port: int = 4840):
     await line2_speed.set_writable()
     line2_temp = await line2.add_variable(idx, "Temperature", 25)
     await line2_temp.set_writable()
-    
+
     # Sensors folder
     sensors_folder = await objects.add_folder(idx, "Sensors")
     sensor1 = await sensors_folder.add_variable(idx, "Sensor1", 123.45)
     await sensor1.set_writable()
     sensor2 = await sensors_folder.add_variable(idx, "Sensor2", 678.90)
     await sensor2.set_writable()
-    
+
     # Array variable
     array_var = await test_folder.add_variable(idx, "ArrayVar", [1, 2, 3, 4, 5])
     await array_var.set_writable()
-    
+
     # Negative numbers
     negative_var = await test_folder.add_variable(idx, "NegativeVar", -42)
     await negative_var.set_writable()
