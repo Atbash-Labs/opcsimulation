@@ -85,10 +85,39 @@ The export file is a JSON file containing:
 - Access Level (if applicable)
 - Children nodes (recursive structure)
 
+## Testing
+
+Run the test suite:
+
+```bash
+# Install test dependencies
+pip install -r requirements.txt
+
+# Run all tests
+pytest
+
+# Run with verbose output
+pytest -v
+
+# Run specific test file
+pytest tests/test_opc_sync.py
+
+# Run specific test
+pytest tests/test_opc_sync.py::TestOPCExport::test_export_nodes
+```
+
+The test suite includes:
+- **Export tests**: Verify nodes are exported correctly with values
+- **Import tests**: Verify values are imported and modified on destination servers
+- **Integration tests**: Full export/import cycle with value verification
+
+Tests use separate test servers on ports 4850 and 4851 to avoid conflicts.
+
 ## Notes
 
 - Only readable/writable nodes are exported/imported
 - The tool handles hierarchical node structures
 - Variable nodes with values are prioritized for import
 - Object nodes are created but their values come from their child Variable nodes
+- Tests automatically start/stop test servers for isolated testing
 

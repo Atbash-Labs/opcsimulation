@@ -35,6 +35,13 @@ env/
 # OPC UA export files (optional - uncomment if you don't want to commit exports)
 # *.json
 
+# Test files
+opc_test_*.json
+*.pyc
+.pytest_cache/
+.coverage
+htmlcov/
+
 # OS
 .DS_Store
 Thumbs.db
