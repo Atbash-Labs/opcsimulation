@@ -1,4 +1,4 @@
-name: Build Executables
+name: Build Executables and Create Release
 
 on:
   push:
@@ -13,6 +13,8 @@ jobs:
     steps:
     - name: Checkout code
       uses: actions/checkout@v4
+      with:
+        fetch-depth: 0  # Fetch all history for tags
     
     - name: Set up Python
       uses: actions/setup-python@v5
@@ -47,7 +49,42 @@ jobs:
         Copy-Item "dist\import_opc_nodes.exe" -Destination "artifacts\" -Force
         Copy-Item "dist\create_nodes_from_export.exe" -Destination "artifacts\" -Force
     
-    - name: Upload artifacts
+    - name: Generate version tag
+      id: version
+      run: |
+        $date = Get-Date -Format "yyyy.MM.dd"
+        $shortSha = "${{ github.sha }}".Substring(0, 7)
+        $version = "$date-$shortSha"
+        echo "VERSION=$version" >> $env:GITHUB_ENV
+        echo "version=$version" >> $env:GITHUB_OUTPUT
+        Write-Host "Version: $version"
+    
+    - name: Create Release
+      uses: softprops/action-gh-release@v1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        tag_name: v${{ env.VERSION }}
+        name: Release v${{ env.VERSION }}
+        body: |
+          Automated release from commit ${{ github.sha }}
+          
+          **Executables included:**
+          - `export_opc_nodes.exe` - Export OPC UA nodes/values to JSON
+          - `import_opc_nodes.exe` - Import OPC UA nodes/values from JSON
+          - `create_nodes_from_export.exe` - Create OPC UA server from export file
+          
+          **Build Date:** ${{ github.event.head_commit.timestamp }}
+          **Commit:** ${{ github.sha }}
+          **Commit Message:** ${{ github.event.head_commit.message }}
+        draft: false
+        prerelease: false
+        files: |
+          artifacts/export_opc_nodes.exe
+          artifacts/import_opc_nodes.exe
+          artifacts/create_nodes_from_export.exe
+    
+    - name: Upload artifacts (for workflow artifacts)
       uses: actions/upload-artifact@v4
       with:
         name: windows-executables
