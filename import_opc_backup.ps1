@@ -200,29 +200,52 @@ if ($DryRun) {
 # Get script directory for Python scripts
 $scriptDir = Split-Path -Parent $MyInvocation.MyCommand.Path
 
-# Install dependencies from C:\opcbackup\requirements.txt
-$requirementsPath = Join-Path $BackupDir "requirements.txt"
+# Check if executable exists, otherwise use Python script
+$exePath = Join-Path $scriptDir "import_opc_nodes.exe"
+$scriptPath = Join-Path $scriptDir "import_opc_nodes.py"
 
-if (Test-Path $requirementsPath) {
-    Write-Host "Installing Python dependencies from $requirementsPath..." -ForegroundColor Gray
-    try {
-        & $pythonExe -m pip install -q -r $requirementsPath 2>&1 | Out-Null
-        if ($LASTEXITCODE -eq 0) {
-            Write-Host "Dependencies installed successfully" -ForegroundColor Gray
-        }
-    } catch {
-        Write-Host "Warning: Could not install dependencies, continuing anyway..." -ForegroundColor Yellow
-    }
+if (Test-Path $exePath) {
+    # Use executable if available
+    $executable = $exePath
+    $useExe = $true
+    Write-Host "Using executable: $exePath" -ForegroundColor Gray
 } else {
-    Write-Host "Warning: requirements.txt not found at $requirementsPath" -ForegroundColor Yellow
+    # Use Python script
+    $executable = $pythonExe
+    $useExe = $false
+    
+    # Install dependencies from C:\opcbackup\requirements.txt
+    $requirementsPath = Join-Path $BackupDir "requirements.txt"
+    
+    if (Test-Path $requirementsPath) {
+        Write-Host "Installing Python dependencies from $requirementsPath..." -ForegroundColor Gray
+        try {
+            & $pythonExe -m pip install -q -r $requirementsPath 2>&1 | Out-Null
+            if ($LASTEXITCODE -eq 0) {
+                Write-Host "Dependencies installed successfully" -ForegroundColor Gray
+            }
+        } catch {
+            Write-Host "Warning: Could not install dependencies, continuing anyway..." -ForegroundColor Yellow
+        }
+    } else {
+        Write-Host "Warning: requirements.txt not found at $requirementsPath" -ForegroundColor Yellow
+    }
 }
 
 # Build command arguments
-$scriptArgs = @(
-    (Join-Path $scriptDir "import_opc_nodes.py")
-    "--destination-url", $ServerUrl
-    "--input-file", $BackupFile
-)
+if ($useExe) {
+    $scriptArgs = @(
+        $exePath
+        "--destination-url", $ServerUrl
+        "--input-file", $BackupFile
+    )
+} else {
+    $scriptArgs = @(
+        $scriptPath
+        "--destination-url", $ServerUrl
+        "--input-file", $BackupFile
+    )
+}
 
 # Add authentication if provided
 if ($Username -ne "") {
@@ -239,7 +262,7 @@ if ($DryRun) {
 
 # Run the import script
 try {
-    & $pythonExe $scriptArgs
+    & $executable $scriptArgs
     
     if ($LASTEXITCODE -eq 0) {
         if ($DryRun) {

@@ -9,9 +9,33 @@ A tool to export nodes/values from an OPC UA server to a file, and import them i
 
 ## Installation
 
+### Option 1: Use Pre-built Executables
+
+Download the latest executables from the [GitHub Actions artifacts](https://github.com/Atbash-Labs/opcsimulation/actions) (built automatically on push to master):
+- `export_opc_nodes.exe` - Export tool
+- `import_opc_nodes.exe` - Import tool  
+- `create_nodes_from_export.exe` - Create server from export
+
+Place the executables in the same directory as the PowerShell scripts.
+
+### Option 2: Install Python Dependencies
+
 ```bash
 pip install -r requirements.txt
 ```
+
+### Building Executables Locally
+
+To build executables yourself:
+
+```bash
+pip install pyinstaller
+pyinstaller export_opc_nodes.spec
+pyinstaller import_opc_nodes.spec
+pyinstaller create_nodes_from_export.spec
+```
+
+The executables will be in the `dist/` directory.
 
 ## Usage
 

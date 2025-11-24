@@ -42,6 +42,12 @@ opc_test_*.json
 .coverage
 htmlcov/
 
+# PyInstaller
+build/
+dist/
+*.spec.bak
+*.spec~
+
 # OS
 .DS_Store
 Thumbs.db
