@@ -1,0 +1,419 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; style-src 'self' 'unsafe-inline'; script-src 'self'">
+    <title>OPC Simulation</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <!-- Title Bar (for Windows/Linux) -->
+    <div id="titlebar">
+        <div class="titlebar-drag">
+            <span class="app-icon">&#9881;</span>
+            <span class="app-title">OPC Simulation</span>
+        </div>
+        <div class="titlebar-controls">
+            <button class="titlebar-btn" id="btn-minimize">&#x2212;</button>
+            <button class="titlebar-btn" id="btn-maximize">&#x25A1;</button>
+            <button class="titlebar-btn close" id="btn-close">&#x2715;</button>
+        </div>
+    </div>
+
+    <div class="app-container">
+        <!-- Sidebar -->
+        <aside class="sidebar">
+            <nav class="sidebar-nav">
+                <button class="nav-btn active" data-section="dashboard">
+                    <span class="nav-icon">&#x2302;</span>
+                    <span class="nav-text">Dashboard</span>
+                </button>
+                <button class="nav-btn" data-section="export">
+                    <span class="nav-icon">&#x21E7;</span>
+                    <span class="nav-text">Export</span>
+                </button>
+                <button class="nav-btn" data-section="import">
+                    <span class="nav-icon">&#x21E9;</span>
+                    <span class="nav-text">Import</span>
+                </button>
+                <button class="nav-btn" data-section="servers">
+                    <span class="nav-icon">&#x25B6;</span>
+                    <span class="nav-text">Servers</span>
+                </button>
+                <button class="nav-btn" data-section="browser">
+                    <span class="nav-icon">&#x2630;</span>
+                    <span class="nav-text">Browser</span>
+                </button>
+                <button class="nav-btn" data-section="files">
+                    <span class="nav-icon">&#x1F4C1;</span>
+                    <span class="nav-text">Files</span>
+                </button>
+            </nav>
+            <div class="sidebar-footer">
+                <button class="nav-btn" data-section="settings">
+                    <span class="nav-icon">&#x2699;</span>
+                    <span class="nav-text">Settings</span>
+                </button>
+            </div>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <!-- Dashboard Section -->
+            <section class="section active" id="section-dashboard">
+                <div class="section-header">
+                    <h1>Dashboard</h1>
+                    <p class="subtitle">OPC UA Simulation Tool</p>
+                </div>
+
+                <div class="dashboard-grid">
+                    <div class="card quick-action" onclick="showSection('export')">
+                        <div class="card-icon export-icon">&#x21E7;</div>
+                        <h3>Export Nodes</h3>
+                        <p>Export OPC UA nodes from a server to JSON</p>
+                    </div>
+                    <div class="card quick-action" onclick="showSection('import')">
+                        <div class="card-icon import-icon">&#x21E9;</div>
+                        <h3>Import Nodes</h3>
+                        <p>Import OPC UA nodes from JSON to a server</p>
+                    </div>
+                    <div class="card quick-action" onclick="showSection('servers')">
+                        <div class="card-icon server-icon">&#x25B6;</div>
+                        <h3>Start Server</h3>
+                        <p>Create or start a test OPC UA server</p>
+                    </div>
+                    <div class="card quick-action" onclick="showSection('browser')">
+                        <div class="card-icon browse-icon">&#x2630;</div>
+                        <h3>Browse Nodes</h3>
+                        <p>Browse and inspect exported node data</p>
+                    </div>
+                </div>
+
+                <div class="card status-card">
+                    <h3>Recent Activity</h3>
+                    <div id="recent-activity" class="activity-list">
+                        <p class="empty-state">No recent activity</p>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Export Section -->
+            <section class="section" id="section-export">
+                <div class="section-header">
+                    <h1>Export Nodes</h1>
+                    <p class="subtitle">Export OPC UA nodes from a server to JSON file</p>
+                </div>
+
+                <div class="card form-card">
+                    <form id="export-form">
+                        <div class="form-group">
+                            <label for="export-url">Source Server URL</label>
+                            <input type="text" id="export-url" placeholder="opc.tcp://localhost:4840" required>
+                        </div>
+
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="export-username">Username (optional)</label>
+                                <input type="text" id="export-username" placeholder="Username">
+                            </div>
+                            <div class="form-group">
+                                <label for="export-password">Password (optional)</label>
+                                <input type="password" id="export-password" placeholder="Password">
+                            </div>
+                        </div>
+
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="export-security-policy">Security Policy</label>
+                                <select id="export-security-policy">
+                                    <option value="">None</option>
+                                    <option value="Basic128Rsa15">Basic128Rsa15</option>
+                                    <option value="Basic256">Basic256</option>
+                                    <option value="Basic256Sha256">Basic256Sha256</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label for="export-security-mode">Security Mode</label>
+                                <select id="export-security-mode">
+                                    <option value="">None</option>
+                                    <option value="Sign">Sign</option>
+                                    <option value="SignAndEncrypt">SignAndEncrypt</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="export-filename">Output Filename</label>
+                            <input type="text" id="export-filename" placeholder="export-2024.json">
+                        </div>
+
+                        <div class="form-actions">
+                            <button type="button" class="btn secondary" onclick="checkServer('export')">Test Connection</button>
+                            <button type="submit" class="btn primary">Export Nodes</button>
+                        </div>
+                    </form>
+                </div>
+
+                <div class="card log-card" id="export-log-card" style="display: none;">
+                    <div class="log-header">
+                        <h3>Export Log</h3>
+                        <button class="btn small" onclick="clearLog('export')">Clear</button>
+                    </div>
+                    <div class="log-content" id="export-log"></div>
+                </div>
+            </section>
+
+            <!-- Import Section -->
+            <section class="section" id="section-import">
+                <div class="section-header">
+                    <h1>Import Nodes</h1>
+                    <p class="subtitle">Import OPC UA nodes from JSON file to a server</p>
+                </div>
+
+                <div class="card form-card">
+                    <form id="import-form">
+                        <div class="form-group">
+                            <label for="import-url">Destination Server URL</label>
+                            <input type="text" id="import-url" placeholder="opc.tcp://localhost:4840" required>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="import-file">Input File</label>
+                            <div class="file-input-group">
+                                <input type="text" id="import-file" placeholder="Select a file..." required readonly>
+                                <button type="button" class="btn" onclick="selectImportFile()">Browse</button>
+                            </div>
+                        </div>
+
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="import-username">Username (optional)</label>
+                                <input type="text" id="import-username" placeholder="Username">
+                            </div>
+                            <div class="form-group">
+                                <label for="import-password">Password (optional)</label>
+                                <input type="password" id="import-password" placeholder="Password">
+                            </div>
+                        </div>
+
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="import-security-policy">Security Policy</label>
+                                <select id="import-security-policy">
+                                    <option value="">None</option>
+                                    <option value="Basic128Rsa15">Basic128Rsa15</option>
+                                    <option value="Basic256">Basic256</option>
+                                    <option value="Basic256Sha256">Basic256Sha256</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label for="import-security-mode">Security Mode</label>
+                                <select id="import-security-mode">
+                                    <option value="">None</option>
+                                    <option value="Sign">Sign</option>
+                                    <option value="SignAndEncrypt">SignAndEncrypt</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div class="form-group checkbox-group">
+                            <label>
+                                <input type="checkbox" id="import-dry-run">
+                                <span>Dry Run (validate without writing)</span>
+                            </label>
+                        </div>
+
+                        <div class="form-actions">
+                            <button type="button" class="btn secondary" onclick="checkServer('import')">Test Connection</button>
+                            <button type="submit" class="btn primary">Import Nodes</button>
+                        </div>
+                    </form>
+                </div>
+
+                <div class="card log-card" id="import-log-card" style="display: none;">
+                    <div class="log-header">
+                        <h3>Import Log</h3>
+                        <button class="btn small" onclick="clearLog('import')">Clear</button>
+                    </div>
+                    <div class="log-content" id="import-log"></div>
+                </div>
+            </section>
+
+            <!-- Servers Section -->
+            <section class="section" id="section-servers">
+                <div class="section-header">
+                    <h1>Server Management</h1>
+                    <p class="subtitle">Start and manage OPC UA servers</p>
+                </div>
+
+                <div class="servers-grid">
+                    <div class="card server-card">
+                        <h3>Test Server</h3>
+                        <p>Start a simple OPC UA test server with sample data</p>
+
+                        <div class="form-group">
+                            <label for="test-server-port">Port</label>
+                            <input type="number" id="test-server-port" value="4840" min="1024" max="65535">
+                        </div>
+
+                        <div class="server-status" id="test-server-status">
+                            <span class="status-dot"></span>
+                            <span class="status-text">Stopped</span>
+                        </div>
+
+                        <div class="form-actions">
+                            <button class="btn primary" id="btn-test-server" onclick="toggleTestServer()">Start Server</button>
+                        </div>
+                    </div>
+
+                    <div class="card server-card">
+                        <h3>Create Server from Export</h3>
+                        <p>Create a new OPC UA server using an export file</p>
+
+                        <div class="form-group">
+                            <label for="create-server-file">Export File</label>
+                            <div class="file-input-group">
+                                <input type="text" id="create-server-file" placeholder="Select a file..." readonly>
+                                <button type="button" class="btn" onclick="selectCreateServerFile()">Browse</button>
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="create-server-port">Port</label>
+                            <input type="number" id="create-server-port" value="4841" min="1024" max="65535">
+                        </div>
+
+                        <div class="server-status" id="create-server-status">
+                            <span class="status-dot"></span>
+                            <span class="status-text">Stopped</span>
+                        </div>
+
+                        <div class="form-actions">
+                            <button class="btn primary" id="btn-create-server" onclick="toggleCreateServer()">Start Server</button>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card log-card" id="server-log-card" style="display: none;">
+                    <div class="log-header">
+                        <h3>Server Log</h3>
+                        <button class="btn small" onclick="clearLog('server')">Clear</button>
+                    </div>
+                    <div class="log-content" id="server-log"></div>
+                </div>
+            </section>
+
+            <!-- Browser Section -->
+            <section class="section" id="section-browser">
+                <div class="section-header">
+                    <h1>Node Browser</h1>
+                    <p class="subtitle">Browse and inspect exported OPC UA nodes</p>
+                </div>
+
+                <div class="browser-toolbar">
+                    <div class="file-input-group">
+                        <input type="text" id="browser-file" placeholder="Select an export file..." readonly>
+                        <button class="btn" onclick="selectBrowserFile()">Browse</button>
+                        <button class="btn primary" onclick="loadBrowserFile()">Load</button>
+                    </div>
+                    <input type="text" id="browser-search" placeholder="Search nodes..." oninput="filterNodes()">
+                </div>
+
+                <div class="browser-container">
+                    <div class="card browser-info" id="browser-info">
+                        <p class="empty-state">Select an export file to browse nodes</p>
+                    </div>
+
+                    <div class="browser-content" style="display: none;">
+                        <div class="browser-tree" id="browser-tree"></div>
+                        <div class="browser-details" id="browser-details">
+                            <h3>Node Details</h3>
+                            <p class="empty-state">Select a node to view details</p>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Files Section -->
+            <section class="section" id="section-files">
+                <div class="section-header">
+                    <h1>Export Files</h1>
+                    <p class="subtitle">Manage your exported OPC UA node files</p>
+                </div>
+
+                <div class="files-toolbar">
+                    <button class="btn" onclick="refreshFileList()">Refresh</button>
+                    <button class="btn" onclick="copySampleExport()">Load Sample Export</button>
+                </div>
+
+                <div class="card">
+                    <table class="files-table">
+                        <thead>
+                            <tr>
+                                <th>Filename</th>
+                                <th>Size</th>
+                                <th>Modified</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="files-list">
+                            <tr>
+                                <td colspan="4" class="empty-state">No export files found</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </section>
+
+            <!-- Settings Section -->
+            <section class="section" id="section-settings">
+                <div class="section-header">
+                    <h1>Settings</h1>
+                    <p class="subtitle">Configure application settings</p>
+                </div>
+
+                <div class="card form-card">
+                    <form id="settings-form">
+                        <div class="form-group">
+                            <label for="settings-python-path">Python Path</label>
+                            <input type="text" id="settings-python-path" placeholder="python3">
+                            <small>Path to Python executable (python3 or full path)</small>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="settings-default-source">Default Source URL</label>
+                            <input type="text" id="settings-default-source" placeholder="opc.tcp://localhost:4840">
+                        </div>
+
+                        <div class="form-group">
+                            <label for="settings-default-dest">Default Destination URL</label>
+                            <input type="text" id="settings-default-dest" placeholder="opc.tcp://localhost:4840">
+                        </div>
+
+                        <div class="form-actions">
+                            <button type="submit" class="btn primary">Save Settings</button>
+                        </div>
+                    </form>
+                </div>
+
+                <div class="card">
+                    <h3>Application Info</h3>
+                    <div id="app-info" class="info-grid"></div>
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <!-- Toast Notifications -->
+    <div id="toast-container"></div>
+
+    <!-- Loading Overlay -->
+    <div id="loading-overlay" class="hidden">
+        <div class="loader"></div>
+        <p id="loading-text">Loading...</p>
+    </div>
+
+    <script src="app.js"></script>
+</body>
+</html>
